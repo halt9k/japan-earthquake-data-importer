@@ -13,7 +13,7 @@ def unpack_tar(arc_path):
     return tar
 
 
-def process_arcive(arc_path, filter_extensions):
+def extract_arcive_files(arc_path, filter_extensions):
     tar = unpack_tar(arc_path)
 
     extracted_data = {}
