@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.pandas_utils import dataframe_from_text
+from pandas_utils import dataframe_from_text
 
 
 def jap_text_to_tables(raw_bytes):
