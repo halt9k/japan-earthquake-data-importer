@@ -2,9 +2,9 @@ import glob
 import os
 import subprocess
 
-from src.config import read_config
-from src.errors import err_exit, log_msg
-from src.jap_arc_parser import jap_arc_to_xlsx
+from config import read_config
+from errors import err_exit, log_msg
+from jap_arc_parser import jap_arc_to_xlsx
 from tkinter import filedialog
 
 CONFIG_FILE = 'settings.ini'
@@ -19,7 +19,7 @@ def os_view_path(path):
 
 
 def process_dir(a_config):
-    arc_path = None
+    arc_path, arc_paths = None, None
     default_path = a_config['Source files']['default_path']
 
     default_valid_path = os.path.commonpath([default_path])
@@ -37,9 +37,12 @@ def process_dir(a_config):
     else:
         path = os.path.abspath(default_path)
         arc_path = filedialog.askopenfilename(filetypes=[('Japan archives', ARC_EXTENSION)], initialdir=path)
+        if not arc_path:
+            err_exit('canceled')
         arc_paths = [arc_path]
 
     xlsx_fname = None
+
     for path in arc_paths:
         xlsx_fname = jap_arc_to_xlsx(path)
 
