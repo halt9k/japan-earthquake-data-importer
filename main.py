@@ -1,10 +1,15 @@
 import glob
 import os
 import subprocess
+import sys
 
-from config import read_config
-from errors import err_exit, log_msg
-from jap_arc_parser import jap_arc_to_xlsx
+# TODO answer SO questions on deploy error if this line missing
+# TODO create public git portable
+sys.path.append(os.path.dirname(__file__))
+
+from src.config import read_config
+from src.errors import err_exit, log_msg
+from src.jap_arc_parser import jap_arc_to_xlsx
 from tkinter import filedialog
 
 CONFIG_FILE = 'settings.ini'

@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 
-from errors import err_exit, log_msg
-from jap_txt_parser import jap_text_to_tables
-from tar_extract import extract_arcive_files
+from src.errors import err_exit, log_msg
+from src.jap_txt_parser import jap_text_to_tables
+from src.tar_extract import extract_arcive_files
 
 EXTRACT_ARC_EXT = ['.EW1', '.EW2', '.NS1', '.NS2', '.UD1', '.UD2']
 
