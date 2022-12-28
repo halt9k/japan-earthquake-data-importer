@@ -1,10 +1,11 @@
 import os
 
-import pandas as pd
+import shutil
 
 from src.errors import err_exit, log_msg
 from src.jap_txt_parser import jap_text_to_tables
 from src.tar_extract import extract_arcive_files
+from xls_writer import modify_excel_shreadsheet
 
 EXTRACT_ARC_EXT = ['.EW1', '.EW2', '.NS1', '.NS2', '.UD1', '.UD2']
 
@@ -14,36 +15,47 @@ EXTRACT_ARC_EXT = ['.EW1', '.EW2', '.NS1', '.NS2', '.UD1', '.UD2']
 # reload(data_processing)
 
 
-def split_line_at_pos(line, pos):
-    assert (line[pos] == ' ')
-    return [line[0: pos], line[pos + 1: -1]]
+def verify_file_exists(path):
+    if not os.path.exists(path):
+        err_exit('Expected file missing: \n' + path)
 
 
-def create_excel_shreadsheet(fname, eq_tables):
-    log_msg('Writing xlsx from archive files ' + str(eq_tables.keys()))
-    writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
+def copy_file_override(src, dst):
+    if os.path.exists(dst):
+        log_msg('File will be overwritten: \n' + dst)
 
-    for arc_fname, df in eq_tables.items():
-        df.to_excel(writer, sheet_name=arc_fname, index=False)
-
-    writer.close()
+    shutil.copyfile(src, dst)
 
 
-def jap_arc_to_xlsx(arc_path):
-    log_msg('Processing archive ' + os.path.abspath(arc_path))
-    eq_data = extract_arcive_files(arc_path, EXTRACT_ARC_EXT)
+def prepare_files(src_arc_path, xlsx_template_path):
+    verify_file_exists(src_arc_path)
+    verify_file_exists(xlsx_template_path)
+
+    name, ext = os.path.splitext(src_arc_path)
+    _, xls_ext = os.path.splitext(xlsx_template_path)
+    tgt_xlsx_path = name + '_imported' + xls_ext
+    copy_file_override(xlsx_template_path, tgt_xlsx_path)
+
+    verify_file_exists(tgt_xlsx_path)
+    return tgt_xlsx_path
+
+
+def jap_arc_to_xlsx(src_arc_path, xlsx_template_path):
+    tgt_xlsx_path = prepare_files(src_arc_path, xlsx_template_path)
+
+    log_msg('Processing archive \n' + os.path.abspath(src_arc_path) + '\nto \n' + tgt_xlsx_path)
+    eq_data = extract_arcive_files(src_arc_path, EXTRACT_ARC_EXT)
 
     eq_pd_tables = {}
     for time_key, file_bytes in eq_data.items():
         try:
-            eq_pd_tables[time_key] = jap_text_to_tables(file_bytes)
+            text = str(file_bytes, "utf-8")
+            eq_pd_tables[time_key] = jap_text_to_tables(text)
         except ValueError:
             err_exit(str(ValueError) + time_key)
 
-    arc_fname = os.path.splitext(arc_path)[0] + '.xlsx'
-    arc_full_fname = os.path.abspath(arc_fname)
-    create_excel_shreadsheet(arc_full_fname, eq_pd_tables)
+    modify_excel_shreadsheet(tgt_xlsx_path, eq_pd_tables)
 
-    return arc_full_fname
+    return tgt_xlsx_path
 
 
