@@ -46,15 +46,15 @@ def jap_arc_to_xlsx(src_arc_path, xlsx_template_path):
     log_msg('Processing archive \n' + os.path.abspath(src_arc_path) + '\nto \n' + tgt_xlsx_path)
     eq_data = extract_arcive_files(src_arc_path, EXTRACT_ARC_EXT)
 
-    eq_pd_tables = {}
-    for time_key, file_bytes in eq_data.items():
+    modify_guide_dfs = {}
+    for fname, fbytes in eq_data.items():
         try:
-            text = str(file_bytes, "utf-8")
-            eq_pd_tables[time_key] = jap_text_to_tables(text)
+            text = str(fbytes, "utf-8")
+            modify_guide_dfs[fname] = jap_text_to_tables(text)
         except ValueError:
-            err_exit(str(ValueError) + time_key)
+            err_exit(str(ValueError) + fname)
 
-    modify_excel_shreadsheet(tgt_xlsx_path, eq_pd_tables)
+    modify_excel_shreadsheet(tgt_xlsx_path, modify_guide_dfs)
 
     return tgt_xlsx_path
 
