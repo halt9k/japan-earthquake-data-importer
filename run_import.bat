@@ -3,7 +3,7 @@ cls
 
 REM Modify next line:
 REM set PYHTON_EXE_PATH=""
-set PYHTON_EXE_PATH=C:\Temp
+set PYHTON_EXE_PATH=python-3.9.10-embed-amd64
 
 set PATH=%PYHTON_EXE_PATH%;%PATH%;
 python --version 2>NUL
@@ -27,9 +27,8 @@ if ERRORLEVEL 1 (
 	echo.
 	echo "If result was No module named 'pandas'"
 	echo "These commands may fix it:"
-	set PYHTON_EXE_VALID_PATH=where /f python.exe
-	echo %PYHTON_EXE_VALID_PATH%"\Scripts\pip install pandas"
-	echo %PYHTON_EXE_VALID_PATH%"\Scripts\pip install xslx"
+	echo PYHTON_EXE_PATH"\Scripts\pip install pandas"
+	echo PYHTON_EXE_PATH"\Scripts\pip install xslx"
 )
 
 :exit
