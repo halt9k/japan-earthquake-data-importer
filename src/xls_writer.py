@@ -17,16 +17,16 @@ def write_table_under_xls_ancor(sheet, anchor, table: pd.DataFrame):
 
     rng = None
     try:
+        sheet.activate()
         rng = xw.Range(anchor)
-        print(rng.count)
-    except:
+    except ValueError:
         log_msg('ERROR: Failed to find ancor ' + anchor)
         raise
 
     try:
         rng.options(index=False, header=False).value = table
-    except:
-        log_msg('ERROR: Failure while import under anchor ' + anchor)
+    except ValueError:
+        log_msg('ERROR: Failure while writing below anchor ' + anchor)
         raise
 
 

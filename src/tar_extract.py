@@ -1,6 +1,8 @@
 import os
 import tarfile
 
+from errors import log_msg
+
 
 def unpack_tar(arc_path):
 
@@ -26,5 +28,5 @@ def extract_arcive_files(arc_path, filter_extensions):
                 continue
 
         extracted_data[fname] = tar.extractfile(item.path).read()
-        print(item)
+        log_msg('Archive contains: ' + item.name)
     return extracted_data

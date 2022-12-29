@@ -1,8 +1,12 @@
+from datetime import datetime
+
 import pandas as pd
 
-from src.pandas_utils import dataframe_from_text
+from src.pandas_utils import dataframe_from_text, insert_row
 
 HEADER_END = 'Memo.'
+HEADER_TO_TIME_FORMAT = ['Origin Time', 'Record Time', 'Last Correction']
+HEADER_SPECIAL_1 = 'Scale Factor'
 HEADER_SPLIT_INDENT = 17
 
 
@@ -17,25 +21,53 @@ def separate_header_and_data(text):
     return header_text, table_text
 
 
-def jap_text_to_tables(text):
-    header_text, table_text = separate_header_and_data(text)
+def fix_header_values(df_header):
+    mask = df_header[0].isin(HEADER_TO_TIME_FORMAT)
+    df_header.loc[mask, 1] = df_header.loc[mask, 1].apply(lambda x: datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
 
+    spec_row_1 = df_header.loc[df_header[0] == HEADER_SPECIAL_1]
+    vals = spec_row_1.values[0, 1].split('(gal)/')
+
+    spec_row_1.iat[0, 0] = 'Ok' + HEADER_SPECIAL_1
+    spec_row_1.iat[0, 1] = int(vals[0]) / int(vals[1])
+
+    # df_header.loc[len(df_header)] = spec_row_1
+    # pd.concat([spec_row_1, df_header])
+    return insert_row(df_header, spec_row_1, spec_row_1.index[0])
+
+
+def process_header(header_text):
     df_header = dataframe_from_text(header_text)
     if (df_header[0].str[HEADER_SPLIT_INDENT] != ' ').any():
         raise ValueError('Cannot split header ')
-    df_header[1] = df_header[0].str[:HEADER_SPLIT_INDENT]
-    df_header[2] = df_header[0].str[HEADER_SPLIT_INDENT:]
-    df_header = df_header.drop(0, axis=1)
+
+    tmp = df_header[0]
+    df_header[0] = tmp.str[:HEADER_SPLIT_INDENT].str.strip()
+    df_header[1] = tmp.str[HEADER_SPLIT_INDENT:].str.strip()
+
+    df_header = fix_header_values(df_header)
 
     # add empty row
     # df_header.loc[len(df_header)] = pd.NA
 
+    return df_header
+
+
+def process_data_table(table_text):
     df = dataframe_from_text(table_text, split_by_spaces=True)
 
     if df.shape[1] != 8:
         raise ValueError('Not 8 columns in text files ')
     flattened_row = df.to_numpy().flatten(order='C')
     df_column = pd.DataFrame(flattened_row)
+
+    return df_column
+
+
+def jap_text_to_tables(text):
+    header_text, table_text = separate_header_and_data(text)
+    df_header = process_header(header_text)
+    df_column = process_data_table(table_text)
 
     # named_column = pd.DataFrame(flattened_row, columns=[df_header.columns[0]])
     # pd.concat([df_header, named_column], axis=0, ignore_index=True)
