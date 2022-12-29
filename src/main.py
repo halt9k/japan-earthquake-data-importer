@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 
-
 # TODO answer SO questions on deploy error if this line missing
 # TODO create public git portable
 
