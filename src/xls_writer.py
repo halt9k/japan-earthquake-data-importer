@@ -18,7 +18,7 @@ def write_table_under_xls_ancor(sheet, anchor, table: pd.DataFrame):
     rng = None
     try:
         sheet.activate()
-        rng = xw.Range(anchor)
+        rng = xw.Range(anchor).offset(column_offset=1)
     except ValueError:
         log_msg('ERROR: Failed to find ancor ' + anchor)
         raise
