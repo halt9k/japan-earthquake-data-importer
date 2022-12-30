@@ -33,7 +33,7 @@ def fix_header_values(df_header):
 
     # df_header.loc[len(df_header)] = spec_row_1
     # pd.concat([spec_row_1, df_header])
-    return insert_row(df_header, spec_row_1, spec_row_1.index[0])
+    return insert_row(df_header, spec_row_1, spec_row_1.index[0]+1)
 
 
 def process_header(header_text):
