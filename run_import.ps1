@@ -1,4 +1,5 @@
 Cls
+$ErrorActionPreference = "Stop"
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 $ENV_PATH = '.\python\testenv\Scripts\Activate.ps1'
@@ -23,5 +24,5 @@ if ($py_version){
 
 python src\main.py
 
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+# Write-Host -NoNewLine 'Press any key to continue...';
+# $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');

@@ -1,11 +1,11 @@
 Cls
+$ErrorActionPreference = "Stop"
 
 Write-Host 'This installer is optional and not well tested.'
 Write-Host 'It worked, but may override python paths and damage other installs.' 
 Write-Host 'Alternative way is to modify in run_import.ps1 path to correct activate.ps1'
 Write-Host -NoNewLine 'Use at your own risk'
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-# Exit
 
 
 $PYHTON_PATH = '.\python'
@@ -83,5 +83,3 @@ pip install xlwings
 
 cd ..
 
-Write-Host -NoNewLine 'Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
