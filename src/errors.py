@@ -1,6 +1,6 @@
 
-def print_clear(msg):
-    if '\n' in msg:
+def print_clear(msg, is_err):
+    if is_err or '\n' in msg:
         if not msg.startswith('\n'):
             msg = '\n' + msg
         if not msg.endswith('\n'):
@@ -10,9 +10,9 @@ def print_clear(msg):
 
 
 def err_exit(err_msg):
-    print_clear(err_msg)
+    print_clear(err_msg, is_err=True)
     raise
 
 
 def log_msg(msg: str):
-    print_clear(msg)
+    print_clear(msg, is_err=False)
