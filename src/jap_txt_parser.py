@@ -4,10 +4,30 @@ import pandas as pd
 
 from src.pandas_utils import dataframe_from_text, insert_row
 
-HEADER_END = 'Memo.'
-HEADER_TO_TIME_FORMAT = ['Origin Time', 'Record Time', 'Last Correction']
-HEADER_SPECIAL_1 = 'Scale Factor'
+HEADER_SCALE = 'Scale Factor'
+HEADER_DATE = 'Origin Time'
 HEADER_SPLIT_INDENT = 17
+HEADER_END = 'Memo.'
+
+HEADER_FORMAT = {
+    'Origin Time': datetime,
+    'Lat.': float,
+    'Long.': float,
+    'Depth. (km)': int,
+    'Mag.': float,
+    'Station Code': str,
+    'Station Lat.': float,
+    'Station Long.': float,
+    'Station Height(m)': int,
+    'Record Time': datetime,
+    'Sampling Freq(Hz)': str,
+    'Duration Time(s)': int,
+    'Dir.': int,
+    'Scale Factor': str,
+    'Max. Acc. (gal)': float,
+    'Last Correction': datetime,
+    'Memo.': str
+}
 
 
 def separate_header_and_data(text):
@@ -22,18 +42,23 @@ def separate_header_and_data(text):
 
 
 def fix_header_values(df_header):
-    mask = df_header[0].isin(HEADER_TO_TIME_FORMAT)
+    type_table = pd.DataFrame([HEADER_FORMAT.keys(), HEADER_FORMAT.values()]).T
+
+    numbers_mask = type_table[1].isin([int, float])
+    df_header.loc[numbers_mask, 1] = df_header.loc[numbers_mask, 1].apply(pd.to_numeric)
+
+    mask = type_table[1].isin([datetime])
     df_header.loc[mask, 1] = df_header.loc[mask, 1].apply(lambda x: datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
 
-    spec_row_1 = df_header.loc[df_header[0] == HEADER_SPECIAL_1]
+    spec_row_1 = df_header.loc[df_header[0] == HEADER_SCALE]
     vals = spec_row_1.values[0, 1].split('(gal)/')
 
-    spec_row_1.iat[0, 0] = 'Ok' + HEADER_SPECIAL_1
+    spec_row_1.iat[0, 0] = 'Ok' + HEADER_SCALE
     spec_row_1.iat[0, 1] = int(vals[0]) / int(vals[1])
 
     # df_header.loc[len(df_header)] = spec_row_1
     # pd.concat([spec_row_1, df_header])
-    return insert_row(df_header, spec_row_1, spec_row_1.index[0]+1)
+    return insert_row(df_header, spec_row_1, spec_row_1.index[0] + 1)
 
 
 def process_header(header_text):
