@@ -26,7 +26,7 @@ def write_table_under_xls_ancor(sheet, anchor, table: pd.DataFrame):
         range_bottom_right = range_top_left.offset(sx, sy)
         rng = xw.Range(range_top_left, range_bottom_right)
         if not rng.number_format:
-            err_exit('Data format in xlsx template must be all generic, incorrect cell in ' + rng.address)
+            err_exit('Data format in xlsx template must be all general, incorrect cell in ' + rng.address)
 
     except ValueError:
         log_msg('ERROR: Failed to find anchor ' + anchor)
