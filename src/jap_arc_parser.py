@@ -3,7 +3,7 @@ import os
 import shutil
 
 from src.errors import err_exit, log_msg
-from src.jap_txt_parser import jap_text_to_tables
+from src.jap_txt_parser import jap_text_to_tables, HEADER_DATE
 from src.tar_extract import extract_arcive_files
 from xls_writer import modify_excel_shreadsheet
 
@@ -34,7 +34,10 @@ def prepare_files(src_arc_path, xlsx_template_path):
     name, ext = os.path.splitext(src_arc_path)
     _, xls_ext = os.path.splitext(xlsx_template_path)
     tgt_xlsx_path = name + '_imported' + xls_ext
-    copy_file_override(xlsx_template_path, tgt_xlsx_path)
+    try:
+        copy_file_override(xlsx_template_path, tgt_xlsx_path)
+    except PermissionError:
+        err_exit('Close Excel before running script')
 
     verify_file_exists(tgt_xlsx_path)
     return tgt_xlsx_path
@@ -50,7 +53,9 @@ def jap_arc_to_xlsx(src_arc_path, xlsx_template_path):
     for fname, fbytes in eq_data.items():
         try:
             text = str(fbytes, "utf-8")
-            modify_guide_dfs[fname] = jap_text_to_tables(text)
+            df_header, df_data = jap_text_to_tables(text)
+            earthquake_date = df_header.loc[df_header[0] == HEADER_DATE].values[0, 1]
+            modify_guide_dfs[fname] = df_header, df_data, earthquake_date
         except ValueError:
             err_exit(str(ValueError) + fname)
 
