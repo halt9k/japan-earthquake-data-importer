@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import xlwings as xw
 
+from src.config import App
 from errors import log_msg, err_exit
 
 IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
@@ -39,31 +40,44 @@ def write_table_under_xls_ancor(sheet, anchor, table: pd.DataFrame):
         raise
 
 
-def modify_excel_shreadsheet(fname, eq_tables):
-    log_msg('Writing xlsx from archive files \n' + str(eq_tables.keys()))
+def import_to_sheet(sheet, eq_tables):
+    eq_date = None
+
+    for arc_fname, (df_header, df_data, earthquake_date) in eq_tables.items():
+        ext = os.path.splitext(arc_fname)[1].removeprefix('.')
+        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
+        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
+        if eq_date:
+            assert (eq_date == earthquake_date)
+        else:
+            eq_date = earthquake_date
+    return eq_date
+
+
+def modify_excel_shreadsheet(fname, arcives_data):
+    log_msg('Writing xlsx from archive files \n')
 
     # writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
     # for arc_fname, df in eq_tables.items():
     #    df.to_excel(writer, sheet_name=arc_fname, index=False)
     # writer.close()
 
+    slowdown_import = App.config()['UX'].getboolean('slow_paced_import')
+
     workbook = xw.Book(fname)
     try:
-        sht = xw.Sheet(workbook.sheets[0])
-        eq_date = None
+        if not slowdown_import:
+            xw.apps.active.screen_updating = False
 
-        for arc_fname, (df_header, df_data, earthquake_date) in eq_tables.items():
-            ext = os.path.splitext(arc_fname)[1].removeprefix('.')
-            write_table_under_xls_ancor(sht, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
-            write_table_under_xls_ancor(sht, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
-            if eq_date:
-                assert(eq_date == earthquake_date)
-            else:
-                eq_date = earthquake_date
+        template_sheet = xw.Sheet(workbook.sheets[0])
+        for eq_tables in arcives_data.values():
+            import_sheet = template_sheet.copy(after=template_sheet)
+            eq_date = import_to_sheet(import_sheet, eq_tables)
+            import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
 
-        sht.name = eq_date.strftime('%Y.%m.%d_%H%M')
         workbook.save()
     finally:
+        xw.apps.active.screen_updating = True
         app = xw.apps.active
         # workbook.close()
         app.quit()
