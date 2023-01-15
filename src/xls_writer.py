@@ -4,7 +4,7 @@ import pandas as pd
 import xlwings as xw
 
 from src.config import App
-from errors import log_msg, err_exit
+from errors import log_msg, err_exit, debugger_is_active
 
 IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
 IMPORT_XLS_ANCHOR_DATA = "IMPORT_DATA_"
@@ -54,8 +54,18 @@ def import_to_sheet(sheet, eq_tables):
     return eq_date
 
 
+def check_excel_installation():
+    try:
+        if xw.App().version < 1:
+            raise
+    except:
+        err_exit('Excel installation not detected. Try to reinstall Excel 2013+')
+
+
 def modify_excel_shreadsheet(fname, arcives_data):
     log_msg('Writing xlsx from archive files \n')
+
+    check_excel_installation()
 
     # writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
     # for arc_fname, df in eq_tables.items():
@@ -75,9 +85,11 @@ def modify_excel_shreadsheet(fname, arcives_data):
             eq_date = import_to_sheet(import_sheet, eq_tables)
             import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
 
+        template_sheet.delete()
         workbook.save()
     finally:
         xw.apps.active.screen_updating = True
         app = xw.apps.active
         # workbook.close()
-        app.quit()
+        if debugger_is_active():
+            app.quit()

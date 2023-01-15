@@ -27,6 +27,9 @@ def prepare_files(src_arc_paths, xlsx_template_path):
     verify_file_exists(xlsx_template_path)
 
     out_dir = os.path.commonpath(src_arc_paths)
+    if not os.path.isdir(out_dir):
+        out_dir = os.path.dirname(out_dir)
+
     _, xls_ext = os.path.splitext(xlsx_template_path)
     out_fname = 'Imported_' + time.strftime("%Y.%m.%d %H-%M") + xls_ext
 
@@ -56,7 +59,7 @@ def extract_arc_data(src_arc_path):
     return modify_guide_dfs
 
 
-def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path, slowdown_import):
+def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
     tgt_xlsx_path = prepare_files(src_arc_paths, xlsx_template_path)
 
     arc_data = {}

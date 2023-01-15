@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from src.config import App
-from src.errors import err_exit
+from src.errors import err_exit, debugger_is_active
 from src.jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
 from tkinter import filedialog
 
@@ -64,7 +64,7 @@ def get_archives(arc_path):
     return arc_paths
 
 
-def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path, slowdown_import):
+def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
     arc_paths = get_config_paths(try_data_arc_paths, ask_data_paths, [('Japan archives', ARC_MASK)],
                                  'Select source archive', allow_multiple=True)
 
@@ -79,7 +79,7 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
     if len(arc_paths) == 1 and os.path.isdir(arc_paths[0]):
         arc_paths = get_archives(arc_paths[0])
 
-    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path, slowdown_import)
+    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path)
 
     return xlsx_fname
 
@@ -94,11 +94,9 @@ def process_dir():
     try_template_path = App.config()['Data sources']['default_xls_template']
     ask_template = App.config()['Data sources'].getboolean('ask_xls_template')
 
-    slowdown_import = App.config()['UX'].getboolean('slow_paced_import')
+    xlsx_fname = import_data(try_data_paths, ask_data_paths, try_template_path, ask_template)
 
-    xlsx_fname = import_data(try_data_paths, ask_data_paths, try_template_path, ask_template, slowdown_import)
-
-    if xlsx_fname:
+    if xlsx_fname and debugger_is_active():
         os_view_path(xlsx_fname)
 
     return
