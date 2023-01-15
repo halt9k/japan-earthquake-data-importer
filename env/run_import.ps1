@@ -11,9 +11,10 @@ function Wait-UserInput
 	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 	}
 
-Try-Activate-PythonEnviroment $PY_ENV_FOLDER $True
+if (Try-Activate-PythonEnviroment $PY_ENV_FOLDER $True)
+	{
+	python src\main.py
+	deactivate
 
-python src\main.py
-deactivate
-
-# Wait-UserInput
+	# Wait-UserInput
+	}

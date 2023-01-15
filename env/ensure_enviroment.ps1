@@ -2,48 +2,12 @@ Cls
 # Do not change scope
 $ErrorActionPreference = "Stop"
 
+. .\env\utils.ps1
 . .\env\py_environment.ps1
 
-Write-Host 'This script will try to install python enviroment automatically.'
+Write-Host 'This script will try to verify of install python enviroment automatically.'
 
 $PY_INSTALLER_DOWNLOAD_LINK = 'https://www.python.org/ftp/python/3.11.1/python-3.11.1-amd64.exe'
-
-
-function Assert ([bool]$condition, [string]$msg)
-	{
-	if ($condition) 
-		{ return }
-		
-	Write-Host ""
-	Write-Host "ERROR: $msg"
-	Write-Host ""
-	Exit
-	}
-
-
-function Ensure-Dir ([string]$dir_path)
-	{
-	if (Test-Path -Path $dir_path) 
-		{ return }
-
-	New-Item -ItemType Directory -Force -Path $dir_path
-	}
-
-
-function Download-File ([string]$link, [string]$target_path)
-	{
-	if (Test-Path -Path $target_path) 
-		{
-		Write-Host "Installer already downloaded. Delete manually to retry: $target_path"		
-		return
-		}
-	
-	# wget $link -o $target_path
-	Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-	Invoke-WebRequest -Uri $link  -OutFile $target_path
-	}
-
 
 function Install-PythonSilently  ([string]$download_link, [string]$tmp_dir)
 	{
@@ -84,7 +48,7 @@ function Ensure-Python ([string]$download_link, [string]$tmp_dir)
 	{
 	if (Test-PythonLauncher) 
 		{ 
-		Write-Host "Launcher finished successfully. Python install skipped."
+		Write-Host "Launcher activated environment successfully. This usually means python is already correctly installed."
 		return 
 		}
 		
@@ -114,12 +78,13 @@ function Install-Dependencies  ([string]$env_path)
 	{
 	Write-Host "Installing additional python packages"
 	
-	Try-Activate-PythonEnviroment $env_path $True
-	
-	pip install pandas
-	pip install xlwings
+	if (Try-Activate-PythonEnviroment $env_path $True)
+		{		
+		pip install pandas
+		pip install xlwings
 
-    deactivate
+		deactivate
+		}
 	}
 
 
