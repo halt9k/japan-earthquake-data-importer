@@ -1,16 +1,12 @@
 Cls
-# Do not move to functions
+# Do not change scope
 $ErrorActionPreference = "Stop"
+
+. .\env\py_environment.ps1
 
 Write-Host 'This script will try to install python enviroment automatically.'
 
-
 $PY_INSTALLER_DOWNLOAD_LINK = 'https://www.python.org/ftp/python/3.11.1/python-3.11.1-amd64.exe'
-$PY_ENV_FOLDER = '.\python_enviroment'
-
-
-$PYTHON_LAUNCHER_EXE = "py"
-$ENVIROMENT_ACTIVATION_CMD = "Scripts\Activate.ps1"
 
 
 function Assert ([bool]$condition, [string]$msg)
@@ -61,7 +57,7 @@ function Install-PythonSilently  ([string]$download_link, [string]$tmp_dir)
 	Write-Host "Installing python and launcher"
 	# May easily fail with other params
 	# 2>&1 | Out-String  used to wait until installer ends
-	& $exe_path InstallAllUsers=1 AssociateFiles=0 InstallLauncherAllUsers=1 Include_launcher=1 /passive 2>&1 | Out-String		
+	& $exe_path InstallAllUsers=1 AssociateFiles=0 InstallLauncherAllUsers=1 Include_launcher=1 /passive 2>&1 | Out-String
 	}
 
 
@@ -97,24 +93,6 @@ function Ensure-Python ([string]$download_link, [string]$tmp_dir)
 	Assert (Test-PythonLauncher) ("Python launcher is missing. `n" +
 		"Try to install manually from $PY_INSTALLER_DOWNLOAD_LINK `n" +
 		"Ensure launcher option in python installer. `n")
-	}
-
-
-function Try-Activate-PythonEnviroment ([string]$env_path, [bool]$activate)
-	{
-	Write-Host "Trying to activate $env_path"
-		
-    $activation_cmd = Join-Path $env_path $ENVIROMENT_ACTIVATION_CMD
-    $exists = Test-Path -Path $activation_cmd
-
-    if (-not $activate)
-        { 
-		Write-Host "Environment activation script exists: $exists"
-		return $exists 
-		}
-
-    & $activation_cmd
-    return $True
 	}
 
 
