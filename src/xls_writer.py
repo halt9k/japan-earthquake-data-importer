@@ -54,18 +54,15 @@ def import_to_sheet(sheet, eq_tables):
     return eq_date
 
 
-def check_excel_installation():
+def get_workbook(fname):
     try:
-        if xw.App().version < 1:
-            raise
+        return xw.Book(fname)
     except:
         err_exit('Excel installation not detected. Try to reinstall Excel 2013+')
 
 
 def modify_excel_shreadsheet(fname, arcives_data):
     log_msg('Writing xlsx from archive files \n')
-
-    check_excel_installation()
 
     # writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
     # for arc_fname, df in eq_tables.items():
@@ -74,7 +71,7 @@ def modify_excel_shreadsheet(fname, arcives_data):
 
     slowdown_import = App.config()['UX'].getboolean('slow_paced_import')
 
-    workbook = xw.Book(fname)
+    workbook = get_workbook(fname)
     try:
         if not slowdown_import:
             xw.apps.active.screen_updating = False
