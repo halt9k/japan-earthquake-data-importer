@@ -60,9 +60,8 @@ function Install-PythonSilently  ([string]$download_link, [string]$tmp_dir)
 	
 	Write-Host "Installing python and launcher"
 	# May easily fail with other params
-	$output = & $exe_path InstallAllUsers=1 AssociateFiles=0 InstallLauncherAllUsers=1 Include_launcher=1 /passive 2>&1 | Out-String
-	
-	return [bool]$output
+	# 2>&1 | Out-String  used to wait until installer ends
+	& $exe_path InstallAllUsers=1 AssociateFiles=0 InstallLauncherAllUsers=1 Include_launcher=1 /passive 2>&1 | Out-String		
 	}
 
 
@@ -74,11 +73,13 @@ function Test-PythonLauncher
 	if (-not (Get-Command $PYTHON_LAUNCHER_EXE -errorAction SilentlyContinue)) 
 		{ return $False }
 
-    # test if python version > 3.0 activates;
-	# & $PYTHON_LAUNCHER_CMD -V
-	
-    $output = & $PYTHON_LAUNCHER_EXE -3 -V 2>&1 | Out-String
-	
+    # test if python version > 3.0 activates;	
+	# tricky to capture output, 
+	# | Out-String works, but omits possibly important diagnostics
+	Try 
+		{ $output = & $PYTHON_LAUNCHER_EXE -3 -V | Out-String }
+	Catch
+		{ Write-Host "During launcher test: $output" }
 	return [bool]$output
 	}
 	

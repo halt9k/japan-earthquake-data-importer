@@ -1,13 +1,11 @@
+$ErrorActionPreference = "Stop"
 Cls
+
+$PY_ENV_FOLDER = '.\python_enviroment'
+$ENVIROMENT_ACTIVATION_CMD = "Scripts\Activate.ps1"
 
 $ENV_PATH = '.\python\testenv\Scripts\Activate.ps1'
 $DEFAULT_ENV_PATH = './env/Scripts/activate.ps1'
-
-
-function Stop-OnErrors 
-	{
-	$ErrorActionPreference = "Stop"
-	}
 
 
 function Wait-UserInput 
@@ -50,7 +48,7 @@ function Test-PyEnv
 		}
 	}
 
-Stop-OnErrors
+
 Try-ActivatePyEnv
 Test-PyEnv
 
