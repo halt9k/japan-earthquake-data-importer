@@ -2,6 +2,7 @@ Cls
 # Do not change scope
 $ErrorActionPreference = "Stop"
 
+# include
 . .\env\py_environment.ps1
 
 
@@ -11,10 +12,14 @@ function Wait-UserInput
 	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 	}
 
-if (Try-Activate-PythonEnviroment $PY_ENV_FOLDER $True)
-	{
-	python src\main.py
-	deactivate
 
-	# Wait-UserInput
+function Run-PyScript([string]$ENVIROMENT_ACTIVATION_CMD, [string]$tmp_dir)
+	{
+	if (Try-Activate-PythonEnviroment $PY_ENV_FOLDER $True)
+		{
+		py src\main.py
+		deactivate
+
+		# Wait-UserInput
+		}
 	}
