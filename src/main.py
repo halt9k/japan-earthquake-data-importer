@@ -50,7 +50,13 @@ def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multi
 
 def get_config_path(try_path, is_silent, ask_filetypes, ask_title, allow_multiple):
     res = get_config_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple)
-    return res[0] if res else None
+
+    if res:
+        if allow_multiple:
+            assert(type(res) is list)
+        else:
+            assert (type(res) is str)
+    return res
 
 
 def get_archives(arc_path):
