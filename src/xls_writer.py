@@ -61,6 +61,19 @@ def get_workbook(fname):
         err_exit('Unexpected result during Excel initizlization. Ensure Excel 2013+ is installed.')
 
 
+def enter_excel(slowdown_import = True):
+    if not slowdown_import:
+        xw.apps.active.screen_updating = False
+
+
+def exit_excel():
+    xw.apps.active.screen_updating = True
+    app = xw.apps.active
+    # workbook.close()
+    if debugger_is_active():
+        app.quit()
+
+
 def modify_excel_shreadsheet(fname, arcives_data):
     log_msg('Writing xlsx from archive files \n')
 
@@ -73,8 +86,7 @@ def modify_excel_shreadsheet(fname, arcives_data):
 
     workbook = get_workbook(fname)
     try:
-        if not slowdown_import:
-            xw.apps.active.screen_updating = False
+        enter_excel(slowdown_import)
 
         template_sheet = xw.Sheet(workbook.sheets[0])
         for eq_tables in arcives_data.values():
@@ -85,8 +97,32 @@ def modify_excel_shreadsheet(fname, arcives_data):
         template_sheet.delete()
         workbook.save()
     finally:
-        xw.apps.active.screen_updating = True
-        app = xw.apps.active
-        # workbook.close()
-        if debugger_is_active():
-            app.quit()
+        exit_excel()
+
+
+def get_value(fname, sheet_n, xls_range):
+    result = ''
+
+    try:
+        enter_excel()
+        workbook = get_workbook(fname)
+        sheet = xw.Sheet(workbook.sheets[sheet_n])
+        sheet.activate()
+        result = xw.Range(xls_range).value
+    finally:
+        exit_excel()
+
+    return result
+
+
+def get_sheet_count(fname):
+    result = 0
+
+    try:
+        enter_excel()
+        workbook = get_workbook(fname)
+        result = workbook.sheets.count
+    finally:
+        exit_excel()
+
+    return result

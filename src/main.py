@@ -23,7 +23,7 @@ def os_view_path(path):
     subprocess.Popen(full_path)
 
 
-def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple):
+def get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple):
     if not is_silent:
         for path in try_paths:
             verify_file_exists(path)
@@ -44,14 +44,17 @@ def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multi
     return paths
 
 
-def get_config_path(try_path, is_silent, ask_filetypes, ask_title, allow_multiple):
-    res = get_config_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple)
+def get_config_path(try_path, is_silent, ask_filetypes, ask_title):
+    assert (try_path is None or type(try_path) is str)
+    res = get_valid_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple=False)
+    assert (res is None or type(res) is list)
+    return res[0]
 
-    if res:
-        if allow_multiple:
-            assert(type(res) is list)
-        else:
-            assert (type(res) is str)
+
+def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title):
+    assert (try_paths is None or type(try_paths) is list)
+    res = get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple=True)
+    assert (res is None or type(res) is list)
     return res
 
 
@@ -68,15 +71,14 @@ def get_archives(arc_path):
 
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
     arc_paths = get_config_paths(try_data_arc_paths, ask_data_paths, [('Japan archives', ARC_MASK)],
-                                 'Select source archive', allow_multiple=True)
+                                 'Select source archive')
 
     if type(arc_paths) is tuple and len(arc_paths) == 1:
         arc_info = os.path.basename(arc_paths[0])
     else:
         arc_info = ' count of ' + str(len(arc_paths))
     title = 'Select excel template for source archive ' + arc_info
-    template_path = get_config_path(try_template_path, ask_tamplate_path, [('Excel files', XLS_MASK)], title,
-                                    allow_multiple=False)
+    template_path = get_config_path(try_template_path, ask_tamplate_path, [('Excel files', XLS_MASK)], title)
 
     if len(arc_paths) == 1 and os.path.isdir(arc_paths[0]):
         arc_paths = get_archives(arc_paths[0])
