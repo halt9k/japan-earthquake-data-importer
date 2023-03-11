@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import xlwings as xw
 
-from config import App
+from config import APP
 from errors import log_msg, err_exit, debugger_is_active
 
 IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
@@ -69,7 +69,7 @@ def modify_excel_shreadsheet(fname, arcives_data):
     #    df.to_excel(writer, sheet_name=arc_fname, index=False)
     # writer.close()
 
-    slowdown_import = App.config()['UX'].getboolean('slow_paced_import')
+    slowdown_import = APP.config()['UX'].getboolean('slow_paced_import')
 
     workbook = get_workbook(fname)
     try:

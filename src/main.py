@@ -4,7 +4,7 @@ import subprocess
 
 # TODO answer SO questions on deploy error if this line missing
 
-from config import App
+from config import APP
 from errors import err_exit, debugger_is_active
 from jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
 from tkinter import filedialog
@@ -87,14 +87,14 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
 
 
 def process_dir():
-    try_data_paths_text = App.config()['Data sources']['default_arc_paths']
-    ask_data_paths = App.config()['Data sources'].getboolean('ask_archive')
+    try_data_paths_text = APP.config()['Data sources']['default_arc_paths']
+    ask_data_paths = APP.config()['Data sources'].getboolean('ask_archive')
 
     try_data_paths = try_data_paths_text.replace('\t', '').split('\n')
     try_data_paths = list(filter(None, try_data_paths))
 
-    try_template_path = App.config()['Data sources']['default_xls_template']
-    ask_template = App.config()['Data sources'].getboolean('ask_xls_template')
+    try_template_path = APP.config()['Data sources']['default_xls_template']
+    ask_template = APP.config()['Data sources'].getboolean('ask_xls_template')
 
     xlsx_fname = import_data(try_data_paths, ask_data_paths, try_template_path, ask_template)
 
@@ -105,7 +105,7 @@ def process_dir():
 
 
 def main():
-    App.read_config(CONFIG_FILE)
+    APP.read_config(CONFIG_FILE)
     process_dir()
 
 
