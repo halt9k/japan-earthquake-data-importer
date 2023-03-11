@@ -32,8 +32,22 @@ def use_fixture_path(tmp_path: Path, src_path: Path):
 
 # @pytest.mark.usefixtures('use_fixture_path')
 class Test:
-    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/')])
-    def test_process_dir(self, use_fixture_path, src_path):
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/basic')])
+    def test_full_basic(self, use_fixture_path, src_path):
         main()
+        self.fail()
 
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/batch')])
+    def test_full_batch(self, use_fixture_path, src_path):
+        main()
+        self.fail()
+
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/broken_xls')])
+    def test_full_broken_xls(self, use_fixture_path, src_path):
+        main()
+        self.fail()
+
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/empty_xls')])
+    def test_full_empty_xls(self, use_fixture_path, src_path):
+        main()
         self.fail()

@@ -6,6 +6,8 @@
         <entryData>
           <resourceRoots>
             <path value="file://$PROJECT_DIR$/data" />
+            <path value="file://$PROJECT_DIR$/tests/test_config_fixtures" />
+            <path value="file://$PROJECT_DIR$/tests/test_main_fixtures" />
           </resourceRoots>
         </entryData>
       </entry>
