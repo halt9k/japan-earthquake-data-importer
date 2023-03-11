@@ -1,16 +1,12 @@
 import glob
 import os
 import subprocess
-import sys
 
 # TODO answer SO questions on deploy error if this line missing
-# TODO create public git portable
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from src.config import App
-from src.errors import err_exit, debugger_is_active
-from src.jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
+from config import App
+from errors import err_exit, debugger_is_active
+from jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
 from tkinter import filedialog
 
 CONFIG_FILE = 'settings.ini'
@@ -108,6 +104,10 @@ def process_dir():
     return
 
 
-if __name__ == '__main__':
+def main():
     App.read_config(CONFIG_FILE)
     process_dir()
+
+
+if __name__ == '__main__':
+    main()
