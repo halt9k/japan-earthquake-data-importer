@@ -11,7 +11,7 @@ class App:
     @staticmethod
     def get_default_config():
         config_obj = configparser.ConfigParser()
-        config_obj['Source files'] = {
+        config_obj['Data sources'] = {
             'ask_path': False,
             'default_arc_paths': [],
             'ask_xls_template': False,

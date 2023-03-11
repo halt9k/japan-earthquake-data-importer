@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import xlwings as xw
 
-from src.config import App
+from config import App
 from errors import log_msg, err_exit, debugger_is_active
 
 IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
@@ -58,7 +58,7 @@ def get_workbook(fname):
     try:
         return xw.Book(fname)
     except:
-        err_exit('Excel installation not detected. Try to reinstall Excel 2013+')
+        err_exit('Unexpected result during Excel initizlization. Ensure Excel 2013+ is installed.')
 
 
 def modify_excel_shreadsheet(fname, arcives_data):
