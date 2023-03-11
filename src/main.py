@@ -1,16 +1,12 @@
 import glob
 import os
 import subprocess
-import sys
 
 # TODO answer SO questions on deploy error if this line missing
-# TODO create public git portable
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from src.config import App
-from src.errors import err_exit, debugger_is_active
-from src.jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
+from config import APP
+from errors import err_exit, debugger_is_active
+from jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
 from tkinter import filedialog
 
 CONFIG_FILE = 'settings.ini'
@@ -27,7 +23,7 @@ def os_view_path(path):
     subprocess.Popen(full_path)
 
 
-def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple):
+def get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple):
     if not is_silent:
         for path in try_paths:
             verify_file_exists(path)
@@ -48,14 +44,17 @@ def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multi
     return paths
 
 
-def get_config_path(try_path, is_silent, ask_filetypes, ask_title, allow_multiple):
-    res = get_config_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple)
+def get_config_path(try_path, is_silent, ask_filetypes, ask_title):
+    assert (try_path is None or type(try_path) is str)
+    res = get_valid_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple=False)
+    assert (res is None or type(res) is list)
+    return res[0]
 
-    if res:
-        if allow_multiple:
-            assert(type(res) is list)
-        else:
-            assert (type(res) is str)
+
+def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title):
+    assert (try_paths is None or type(try_paths) is list)
+    res = get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple=True)
+    assert (res is None or type(res) is list)
     return res
 
 
@@ -72,15 +71,14 @@ def get_archives(arc_path):
 
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
     arc_paths = get_config_paths(try_data_arc_paths, ask_data_paths, [('Japan archives', ARC_MASK)],
-                                 'Select source archive', allow_multiple=True)
+                                 'Select source archive')
 
     if type(arc_paths) is tuple and len(arc_paths) == 1:
         arc_info = os.path.basename(arc_paths[0])
     else:
         arc_info = ' count of ' + str(len(arc_paths))
     title = 'Select excel template for source archive ' + arc_info
-    template_path = get_config_path(try_template_path, ask_tamplate_path, [('Excel files', XLS_MASK)], title,
-                                    allow_multiple=False)
+    template_path = get_config_path(try_template_path, ask_tamplate_path, [('Excel files', XLS_MASK)], title)
 
     if len(arc_paths) == 1 and os.path.isdir(arc_paths[0]):
         arc_paths = get_archives(arc_paths[0])
@@ -91,14 +89,14 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
 
 
 def process_dir():
-    try_data_paths_text = App.config()['Data sources']['default_arc_paths']
-    ask_data_paths = App.config()['Data sources'].getboolean('ask_archive')
+    try_data_paths_text = APP.config()['Data sources']['default_arc_paths']
+    ask_data_paths = APP.config()['Data sources'].getboolean('ask_archive')
 
     try_data_paths = try_data_paths_text.replace('\t', '').split('\n')
     try_data_paths = list(filter(None, try_data_paths))
 
-    try_template_path = App.config()['Data sources']['default_xls_template']
-    ask_template = App.config()['Data sources'].getboolean('ask_xls_template')
+    try_template_path = APP.config()['Data sources']['default_xls_template']
+    ask_template = APP.config()['Data sources'].getboolean('ask_xls_template')
 
     xlsx_fname = import_data(try_data_paths, ask_data_paths, try_template_path, ask_template)
 
@@ -108,6 +106,10 @@ def process_dir():
     return
 
 
-if __name__ == '__main__':
-    App.read_config(CONFIG_FILE)
+def main():
+    APP.read_config(CONFIG_FILE)
     process_dir()
+
+
+if __name__ == '__main__':
+    main()
