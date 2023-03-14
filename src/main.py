@@ -24,7 +24,7 @@ def os_view_path(path):
 
 
 def get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple):
-    if not is_silent:
+    if is_silent:
         for path in try_paths:
             verify_file_exists(path)
         return try_paths
@@ -41,20 +41,29 @@ def get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multip
     if not paths:
         err_exit('canceled')
 
-    return paths
+    if allow_multiple and type(paths) is tuple:
+        return list(paths)
+    elif not allow_multiple and type(paths) is str:
+        return [paths]
+    else:
+        assert False
 
 
 def get_config_path(try_path, is_silent, ask_filetypes, ask_title):
-    assert (try_path is None or type(try_path) is str)
+    if try_path:
+        assert type(try_path) is str
     res = get_valid_paths([try_path], is_silent, ask_filetypes, ask_title, allow_multiple=False)
-    assert (res is None or type(res) is list)
-    return res[0]
+    if res:
+        assert type(res) is list
+    return res[0] if res else None
 
 
 def get_config_paths(try_paths, is_silent, ask_filetypes, ask_title):
-    assert (try_paths is None or type(try_paths) is list)
+    if try_paths:
+        assert type(try_paths) is list
     res = get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multiple=True)
-    assert (res is None or type(res) is list)
+    if res:
+        assert type(res) is list
     return res
 
 
@@ -68,9 +77,9 @@ def get_archives(arc_path):
 
     return arc_paths
 
-
+# TODO separate into additional processing
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
-    arc_paths = get_config_paths(try_data_arc_paths, ask_data_paths, [('Japan archives', ARC_MASK)],
+    arc_paths = get_config_paths(try_data_arc_paths, not ask_data_paths, [('Japan archives', ARC_MASK)],
                                  'Select source archive')
 
     if type(arc_paths) is tuple and len(arc_paths) == 1:
@@ -78,7 +87,7 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
     else:
         arc_info = ' count of ' + str(len(arc_paths))
     title = 'Select excel template for source archive ' + arc_info
-    template_path = get_config_path(try_template_path, ask_tamplate_path, [('Excel files', XLS_MASK)], title)
+    template_path = get_config_path(try_template_path, not ask_tamplate_path, [('Excel files', XLS_MASK)], title)
 
     if len(arc_paths) == 1 and os.path.isdir(arc_paths[0]):
         arc_paths = get_archives(arc_paths[0])
