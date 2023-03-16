@@ -3,12 +3,9 @@ import os
 import shutil
 import time
 
-from config import APP
-from data_verification import store_data_verification
 from errors import err_exit, log_msg
 from jap_txt_parser import jap_text_to_tables, HEADER_DATE
 from tar_extract import extract_arcive_files
-from xls_writer import modify_excel_shreadsheet
 
 EXTRACT_ARC_EXT = ['.EW1', '.EW2', '.NS1', '.NS2', '.UD1', '.UD2']
 
@@ -61,19 +58,3 @@ def extract_arc_data(src_arc_path):
     return modify_guide_dfs
 
 
-def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
-    tgt_xlsx_path = prepare_files(src_arc_paths, xlsx_template_path)
-
-    arc_data = {}
-    for path in src_arc_paths:
-        log_msg('Processing archive  ' + path)
-        arc_data[path] = extract_arc_data(path)
-
-    if APP.config()['UX'].getboolean('create_control_histograms'):
-        store_data_verification(arc_data)
-
-    log_msg('Writing table to ' + tgt_xlsx_path)
-    modify_excel_shreadsheet(tgt_xlsx_path, arc_data)
-    return tgt_xlsx_path
-
-#d

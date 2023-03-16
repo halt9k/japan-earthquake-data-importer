@@ -23,8 +23,9 @@ def debugger_is_active() -> bool:
 
 def err_exit(err_msg):
     print_clear(err_msg, is_err=True)
-    if not debugger_is_active():
-        exit()
+    if debugger_is_active():
+        breakpoint()
+    exit()
 
 
 def log_msg(msg: str):

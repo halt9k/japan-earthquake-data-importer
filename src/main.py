@@ -5,9 +5,12 @@ import subprocess
 # TODO answer SO questions on deploy error if this line missing
 
 from config import APP
-from errors import err_exit, debugger_is_active
-from jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
+from data_verification import save_data_verification_plots
+from errors import err_exit, debugger_is_active, log_msg
+from jap_arc_parser import verify_file_exists, prepare_files, extract_arc_data
 from tkinter import filedialog
+
+from xls_writer import modify_excel_shreadsheet
 
 CONFIG_FILE = 'settings.ini'
 ARC_EXT = '.tar.gz'
@@ -38,7 +41,7 @@ def get_valid_paths(try_paths, is_silent, ask_filetypes, ask_title, allow_multip
     paths = filedialog.askopenfilename(filetypes=ask_filetypes,
                                        initialdir=closest_valid_dir, initialfile=try_files,
                                        title=ask_title, multiple=allow_multiple)
-    if not paths:
+    if not paths or paths == '':
         err_exit('canceled')
 
     if allow_multiple and type(paths) is tuple:
@@ -76,6 +79,23 @@ def get_archives(arc_path):
         err_exit('amount of earthquake arcives unexpected: ' + str(arcives_count))
 
     return arc_paths
+
+
+def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
+    tgt_xlsx_path = prepare_files(src_arc_paths, xlsx_template_path)
+
+    archives_data = {}
+    for path in src_arc_paths:
+        log_msg('Processing archive  ' + path)
+        archives_data[path] = extract_arc_data(path)
+
+    if APP.config()['UX'].getboolean('create_control_histograms'):
+        save_data_verification_plots(archives_data)
+
+    log_msg('Writing table to ' + tgt_xlsx_path)
+    modify_excel_shreadsheet(tgt_xlsx_path, archives_data)
+    return tgt_xlsx_path
+
 
 # TODO separate into additional processing
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):

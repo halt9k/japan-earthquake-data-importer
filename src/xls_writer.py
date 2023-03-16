@@ -40,10 +40,10 @@ def write_table_under_xls_ancor(sheet, anchor, table: pd.DataFrame):
         raise
 
 
-def import_to_sheet(sheet, eq_tables):
+def import_to_sheet(sheet, eq_data):
     eq_date = None
 
-    for arc_fname, (df_header, df_data, earthquake_date) in eq_tables.items():
+    for arc_fname, (df_header, df_data, earthquake_date) in eq_data.items():
         ext = os.path.splitext(arc_fname)[1].removeprefix('.')
         write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
         write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
@@ -74,11 +74,11 @@ def exit_excel():
         app.quit()
 
 
-def modify_excel_shreadsheet(fname, arcives_data):
+def modify_excel_shreadsheet(fname, archives_data):
     log_msg('Writing xlsx from archive files \n')
 
     # writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
-    # for arc_fname, df in eq_tables.items():
+    # for arc_fname, df in eq_data.items():
     #    df.to_excel(writer, sheet_name=arc_fname, index=False)
     # writer.close()
 
@@ -89,9 +89,9 @@ def modify_excel_shreadsheet(fname, arcives_data):
         enter_excel(slowdown_import)
 
         template_sheet = xw.Sheet(workbook.sheets[0])
-        for eq_tables in arcives_data.values():
+        for eq_data in archives_data.values():
             import_sheet = template_sheet.copy(after=template_sheet)
-            eq_date = import_to_sheet(import_sheet, eq_tables)
+            eq_date = import_to_sheet(import_sheet, eq_data)
             import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
 
         template_sheet.delete()
