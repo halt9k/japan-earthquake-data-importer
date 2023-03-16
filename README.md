@@ -1,7 +1,7 @@
 # Japan earthquake data importer
 This script:
 - unpacks in memory *.tar.gz archives with text tables (K-NET ASCII format)
-- parses them, converts formats and transforms rows/columns
+- parses them, converts entry formats and transforms with pandas  
 - places parsed tables into multiple auto-created Excel pages,  
 based on pre-defined anchors from the template Excel file.  
 

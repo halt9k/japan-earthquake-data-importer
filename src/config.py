@@ -1,4 +1,5 @@
 from configparser import ConfigParser, NoOptionError
+from pathlib import Path
 
 DEFAULT_CONFIG = {
     'Data sources': {
@@ -37,6 +38,8 @@ class AppConfig:
         return opts
 
     def read_config(self, conf_path):
+        assert Path(conf_path).exists()
+
         ini_config = ConfigParser(strict=True)
         ini_config.read(conf_path)
         default_config = AppConfig.get_default_config()

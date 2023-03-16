@@ -1,14 +1,14 @@
 import os
 import shutil
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 from contextlib import contextmanager
 
-from config import APP
-from main import main, process_dir, CONFIG_FILE
+from main import main
 from xls_writer import get_value, get_sheet_count
+from xls_writer import modify_excel_shreadsheet
 
 
 @contextmanager
@@ -33,18 +33,13 @@ def use_fixture_path(tmp_path: Path, src_path: Path):
         yield tmp_path
 
 
-def os_view_path_patched(_):
-    return
-
-
 def err_exit_patched(self, err_msg):
     raise Exception(err_msg)
 
 
-# @pytest.mark.usefixtures('use_fixture_path')
-@patch('main.os_view_path', os_view_path_patched)
+@patch('main.os_view_path', MagicMock)
 @patch('xls_writer.err_exit', err_exit_patched)
-class Test:
+class TestMain:
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/basic')])
     def test_full_basic(self, use_fixture_path, src_path):
         val = get_value('./data/Template_empty.xlsx', sheet_n='0', xls_range='H18')
@@ -74,8 +69,11 @@ class Test:
         with pytest.raises(Exception):
             main()
 
-    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/empty_xls')])
-    def test_control_historgams(self, use_fixture_path, src_path):
-        APP.read_config(CONFIG_FILE)
-        APP.config()['UX']['create_control_histograms'] = True
-        process_dir()
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/distribution_hist_plots')])
+    @patch('main.modify_excel_shreadsheet', MagicMock)
+    def test_distribution_hist_plots(self, use_fixture_path, src_path):
+        img_files = list(Path().glob('./data/*.png'))
+        assert len(img_files) == 0
+        main()
+        img_files = list(Path().glob('./data/*.png'))
+        assert len(img_files) == 6

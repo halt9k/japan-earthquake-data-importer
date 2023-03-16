@@ -5,6 +5,7 @@ import pandas as pd
 from src.pandas_utils import dataframe_from_text, insert_row
 
 HEADER_SCALE = 'Scale Factor'
+HEADER_SCALE_VAL = HEADER_SCALE + ' Val'
 HEADER_DATE = 'Origin Time'
 HEADER_SPLIT_INDENT = 17
 HEADER_END = 'Memo.'
@@ -53,7 +54,7 @@ def fix_header_values(df_header):
     spec_row_1 = df_header.loc[df_header[0] == HEADER_SCALE]
     vals = spec_row_1.values[0, 1].split('(gal)/')
 
-    spec_row_1.iat[0, 0] = 'Ok' + HEADER_SCALE
+    spec_row_1.iat[0, 0] = HEADER_SCALE_VAL
     spec_row_1.iat[0, 1] = int(vals[0]) / int(vals[1])
 
     # df_header.loc[len(df_header)] = spec_row_1
