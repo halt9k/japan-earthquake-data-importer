@@ -6,7 +6,8 @@ from unittest.mock import patch
 import pytest
 from contextlib import contextmanager
 
-from main import main
+from config import APP
+from main import main, process_dir, CONFIG_FILE
 from xls_writer import get_value, get_sheet_count
 
 
@@ -73,3 +74,8 @@ class Test:
         with pytest.raises(Exception):
             main()
 
+    @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/empty_xls')])
+    def test_control_historgams(self, use_fixture_path, src_path):
+        APP.read_config(CONFIG_FILE)
+        APP.config()['UX']['create_control_histograms'] = True
+        process_dir()

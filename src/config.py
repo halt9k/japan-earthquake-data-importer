@@ -8,7 +8,8 @@ DEFAULT_CONFIG = {
         'default_xls_template': ''
     },
     'UX': {
-        'slow_paced_import': True
+        'slow_paced_import': True,
+        'create_control_histograms': False
     }
 }
 
