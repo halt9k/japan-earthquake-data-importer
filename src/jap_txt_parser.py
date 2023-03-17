@@ -84,6 +84,7 @@ def process_data_table(table_text):
 
     if df.shape[1] != 8:
         raise ValueError('Not 8 columns in text files ')
+
     flattened_row = df.to_numpy().flatten(order='C')
     df_column = pd.DataFrame(flattened_row)
 
