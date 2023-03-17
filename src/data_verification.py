@@ -35,7 +35,6 @@ def add_histo(fname, axis_acel_data, limit):
     plt.plot(2.0 / n * np.abs(vals[0:n // 2]), linewidth=0.3)
 
 
-
 def save_hists(arcs_data, limit):
     for arc_name, eq_data in arcs_data.items():
         for fname, axis_acel_data in eq_data.items():

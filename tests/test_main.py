@@ -37,7 +37,7 @@ def err_exit_patched(self, err_msg):
     raise Exception(err_msg)
 
 
-@patch('main.os_view_path', MagicMock)
+##  @patch('main.os_view_path', MagicMock)
 @patch('xls_writer.err_exit', err_exit_patched)
 class TestMain:
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/basic')])
