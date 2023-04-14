@@ -7,7 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/python-3.11.1-embed-amd64" />
       <excludeFolder url="file://$MODULE_DIR$/python" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (temp)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (ObsPy)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
