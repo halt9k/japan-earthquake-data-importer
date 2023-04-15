@@ -1,14 +1,20 @@
 import os
+from pathlib import Path
 
 import shutil
 import time
 
+import pandas as pd
+
 from errors import err_exit, log_msg
-from jap_txt_parser import jap_text_to_tables, HEADER_DATE
+from jap_txt_parser import jap_text_to_tables, HEADER_DATE, VAL_EXPECTED_SAME_FOR_SITE, \
+    VAL_EXPECTED_SAME_ON_SEISMOGRAPH, VAL_EXPECTED_DIFFERENT
 from tar_extract import extract_arcive_files
 from xls_writer import modify_excel_shreadsheet
 
-EXTRACT_ARC_EXT = ['.EW1', '.EW2', '.NS1', '.NS2', '.UD1', '.UD2']
+LOW_SM = ['.EW1', '.NS1', '.UD1']
+HIGH_SM = ['.EW2', '.NS2', '.UD2']
+EXTRACT_ARC_EXT = LOW_SM + HIGH_SM
 
 
 def verify_file_exists(path):
@@ -43,20 +49,70 @@ def prepare_files(src_arc_paths, xlsx_template_path):
     return tgt_xlsx_path
 
 
-def extract_arc_data(src_arc_path):
+def extract_arc_data(src_arc_path, skip_data):
     eq_data = extract_arcive_files(src_arc_path, EXTRACT_ARC_EXT)
 
     modify_guide_dfs = {}
     for fname, fbytes in eq_data.items():
         try:
             text = str(fbytes, "utf-8")
-            df_header, df_data = jap_text_to_tables(text)
+            df_header, _ = jap_text_to_tables(text, skip_data)
             earthquake_date = df_header.loc[df_header[0] == HEADER_DATE].values[0, 1]
-            modify_guide_dfs[fname] = df_header, df_data, earthquake_date
+            modify_guide_dfs[fname] = df_header, None, earthquake_date
         except ValueError:
             err_exit(str(ValueError) + fname)
 
     return modify_guide_dfs
+
+
+def extract_arc_headers(path):
+    return extract_arc_data(path, skip_data=True)
+
+# TODO
+# def ensure_integrity(df_header, df_aggregated):
+#     assert (False)
+
+
+def filter_header(ext, df_header, src_column, column_set):
+    mask = df_header[0].isin(column_set)
+
+    # TODO
+    # ensure_integrity(df_header, df_aggregated)
+    # df_header[df_header[0] == 'Dir.'].iloc[0, 1]
+
+    return df_header[src_column].loc[mask]
+
+
+def aggregate_site_headers(eq_table, col_names_mode=False):
+    site_data_column = None
+
+    for arc_fname, (df_header, _, earthquake_date) in eq_table.items():
+        ext = Path(arc_fname).suffix
+
+        src_column = 1 if not col_names_mode else 0
+        if site_data_column is None:
+            site_data_column = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_FOR_SITE)
+
+        update_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH + VAL_EXPECTED_DIFFERENT)
+        if col_names_mode:
+            update_data += ext
+
+        site_data_column = site_data_column.append(update_data)
+    return site_data_column
+
+
+def aggregate_headers(arc_data):
+    df_aggregated = None
+
+    for fname, eq_table in arc_data.items():
+        if df_aggregated is None:
+            col_names_row = aggregate_site_headers(eq_table, col_names_mode=True)
+            df_aggregated = col_names_row
+
+        eq_site_row = aggregate_site_headers(eq_table)
+        df_aggregated = pd.concat((df_aggregated, eq_site_row), axis=1)
+
+    return df_aggregated
 
 
 def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
@@ -65,8 +121,10 @@ def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
     arc_data = {}
     for path in src_arc_paths:
         log_msg('Processing archive  ' + path)
-        arc_data[path] = extract_arc_data(path)
+        arc_data[path] = extract_arc_headers(path)
+
+    headers_data = aggregate_headers(arc_data)
 
     log_msg('Writing table to ' + tgt_xlsx_path)
-    modify_excel_shreadsheet(tgt_xlsx_path, arc_data)
+    modify_excel_shreadsheet(tgt_xlsx_path, headers_data.T)
     return tgt_xlsx_path
