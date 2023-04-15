@@ -9,25 +9,40 @@ HEADER_DATE = 'Origin Time'
 HEADER_SPLIT_INDENT = 17
 HEADER_END = 'Memo.'
 
-HEADER_FORMAT = {
-    'Origin Time': datetime,
-    'Lat.': float,
-    'Long.': float,
-    'Depth. (km)': int,
-    'Mag.': float,
-    'Station Code': str,
-    'Station Lat.': float,
-    'Station Long.': float,
-    'Station Height(m)': int,
-    'Record Time': datetime,
-    'Sampling Freq(Hz)': str,
-    'Duration Time(s)': int,
-    'Dir.': int,
-    'Scale Factor': str,
-    'Max. Acc. (gal)': float,
-    'Last Correction': datetime,
-    'Memo.': str
-}
+
+class ExpectedDuplications:
+    # same for ['.EW1', '.NS1', '.UD1', '.EW2', '.NS2', '.UD2']
+    SAME_FOR_GEO_SITE = 1
+    # same for ['.EW1', '.NS1', '.UD1'] and ['.EW2', '.NS2', '.UD2']
+    SAME_FOR_SEISMOGRAPH_DIRECTIONS = 2
+    EXPECTED_ANY = 3
+
+
+ED = ExpectedDuplications
+HEADER_INFO = [
+    ['Origin Time', datetime, ED.SAME_FOR_GEO_SITE],
+    ['Lat.', float, ED.SAME_FOR_GEO_SITE],
+    ['Long.', float, ED.SAME_FOR_GEO_SITE],
+    ['Depth. (km)', int, ED.SAME_FOR_GEO_SITE],
+    ['Mag.', float, ED.SAME_FOR_GEO_SITE],
+    ['Station Code', str, ED.SAME_FOR_GEO_SITE],
+    ['Station Lat.', float, ED.SAME_FOR_GEO_SITE],
+    ['Station Long.', float, ED.SAME_FOR_GEO_SITE],
+    ['Station Height(m)', int, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    ['Record Time', datetime, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    ['Sampling Freq(Hz)', str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    ['Duration Time(s)', int, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    ['Dir.', int, ED.EXPECTED_ANY],
+    ['Scale Factor', str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    ['Max. Acc. (gal)', float, ED.EXPECTED_ANY],
+    ['Last Correction', datetime, ED.EXPECTED_ANY],
+    ['Memo.', str ],
+]
+
+DF_HEADER_INFO = pd.DataFrame(HEADER_INFO)
+VAL_EXPECTED_SAME_FOR_SITE = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.SAME_FOR_GEO_SITE, 0])
+VAL_EXPECTED_SAME_ON_SEISMOGRAPH = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS, 0])
+VAL_EXPECTED_DIFFERENT = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.EXPECTED_ANY, 0])
 
 
 def separate_header_and_data(text):
@@ -42,7 +57,7 @@ def separate_header_and_data(text):
 
 
 def fix_header_values(df_header):
-    type_table = pd.DataFrame([HEADER_FORMAT.keys(), HEADER_FORMAT.values()]).T
+    type_table = DF_HEADER_INFO.loc[:, 0:1]
 
     numbers_mask = type_table[1].isin([int, float])
     df_header.loc[numbers_mask, 1] = df_header.loc[numbers_mask, 1].apply(pd.to_numeric)
@@ -89,10 +104,10 @@ def process_data_table(table_text):
     return df_column
 
 
-def jap_text_to_tables(text):
+def jap_text_to_tables(text, skip_data):
     header_text, table_text = separate_header_and_data(text)
     df_header = process_header(header_text)
-    df_column = process_data_table(table_text)
+    df_column = process_data_table(table_text) if not skip_data else None
 
     # named_column = pd.DataFrame(flattened_row, columns=[df_header.columns[0]])
     # pd.concat([df_header, named_column], axis=0, ignore_index=True)
