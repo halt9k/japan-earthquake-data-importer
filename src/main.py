@@ -77,6 +77,7 @@ def get_archives(arc_path):
 
     return arc_paths
 
+
 # TODO separate into additional processing
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
     arc_paths = get_config_paths(try_data_arc_paths, not ask_data_paths, [('Japan archives', ARC_MASK)],

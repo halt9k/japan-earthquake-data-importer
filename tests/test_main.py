@@ -73,3 +73,8 @@ class Test:
         with pytest.raises(Exception):
             main()
 
+    @pytest.mark.parametrize('src_path', [Path('./test_import_headers_experiment')])
+    def test_full_batch(self, use_fixture_path, src_path):
+        main()
+        new_file = list(Path().glob('./data/sites/IBRH17/Imported_*.xlsx'))[0]
+        assert(get_sheet_count(new_file) == 1)
