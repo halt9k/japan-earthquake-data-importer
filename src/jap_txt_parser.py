@@ -5,11 +5,15 @@ import pandas as pd
 from src.pandas_utils import dataframe_from_text, insert_row
 
 HEADER_SCALE = 'Scale Factor'
+HEADER_SCALE_VAL = HEADER_SCALE + ' Value'
+HEADER_FREQ = 'Sampling Freq(Hz)'
+HEADER_FREQ_VAL = HEADER_SCALE + ' Value'
 HEADER_DATE = 'Origin Time'
-HEADER_SPLIT_INDENT = 17
+HEADER_SEPARATOR_INDENT = 17
 HEADER_END = 'Memo.'
 
 
+# TODO ensure all works?
 class ExpectedDuplications:
     # same for ['.EW1', '.NS1', '.UD1', '.EW2', '.NS2', '.UD2']
     SAME_FOR_GEO_SITE = 1
@@ -20,7 +24,7 @@ class ExpectedDuplications:
 
 ED = ExpectedDuplications
 HEADER_INFO = [
-    ['Origin Time', datetime, ED.SAME_FOR_GEO_SITE],
+    [HEADER_DATE, datetime, ED.SAME_FOR_GEO_SITE],
     ['Lat.', float, ED.SAME_FOR_GEO_SITE],
     ['Long.', float, ED.SAME_FOR_GEO_SITE],
     ['Depth. (km)', int, ED.SAME_FOR_GEO_SITE],
@@ -33,16 +37,22 @@ HEADER_INFO = [
     ['Sampling Freq(Hz)', str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Duration Time(s)', int, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Dir.', int, ED.EXPECTED_ANY],
-    ['Scale Factor', str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    [HEADER_SCALE, str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Max. Acc. (gal)', float, ED.EXPECTED_ANY],
     ['Last Correction', datetime, ED.EXPECTED_ANY],
-    ['Memo.', str ],
+    [HEADER_END, str, ED.EXPECTED_ANY],
 ]
-
+# Header is preprocessed during import, after preprocess:
+HEADER_INFO_AP = HEADER_INFO + \
+                 [[HEADER_SCALE_VAL, float, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS]] + \
+                 [[HEADER_FREQ_VAL, float, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS]]
 DF_HEADER_INFO = pd.DataFrame(HEADER_INFO)
-VAL_EXPECTED_SAME_FOR_SITE = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.SAME_FOR_GEO_SITE, 0])
-VAL_EXPECTED_SAME_ON_SEISMOGRAPH = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS, 0])
-VAL_EXPECTED_DIFFERENT = list(DF_HEADER_INFO.loc[DF_HEADER_INFO[2] == ED.EXPECTED_ANY, 0])
+
+# header info after preprocess
+DF_HEADER_IAP = pd.DataFrame(HEADER_INFO_AP)
+VAL_EXPECTED_SAME_FOR_SITE = list(DF_HEADER_IAP.loc[DF_HEADER_IAP[2] == ED.SAME_FOR_GEO_SITE, 0])
+VAL_EXPECTED_SAME_ON_SEISMOGRAPH = list(DF_HEADER_IAP.loc[DF_HEADER_IAP[2] == ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS, 0])
+VAL_EXPECTED_DIFFERENT = list(DF_HEADER_IAP.loc[DF_HEADER_IAP[2] == ED.EXPECTED_ANY, 0])
 
 
 def separate_header_and_data(text):
@@ -66,24 +76,37 @@ def fix_header_values(df_header):
     df_header.loc[mask, 1] = df_header.loc[mask, 1].apply(lambda x: datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
 
     spec_row_1 = df_header.loc[df_header[0] == HEADER_SCALE]
+    assert('(gal)/' in spec_row_1.values[0, 1])
     vals = spec_row_1.values[0, 1].split('(gal)/')
 
-    spec_row_1.iat[0, 0] = 'Ok' + HEADER_SCALE
+    spec_row_1.iat[0, 0] = HEADER_SCALE_VAL
     spec_row_1.iat[0, 1] = int(vals[0]) / int(vals[1])
 
     # df_header.loc[len(df_header)] = spec_row_1
     # pd.concat([spec_row_1, df_header])
-    return insert_row(df_header, spec_row_1, spec_row_1.index[0] + 1)
+
+    df_header_processed = insert_row(df_header, spec_row_1, spec_row_1.index[0] + 1)
+
+    spec_row_2 = df_header_processed.loc[df_header_processed[0] == HEADER_FREQ]
+    assert ('Hz' in spec_row_2.values[0, 1])
+    val = spec_row_2.values[0, 1].rstrip('Hz')
+
+    spec_row_2.iat[0, 0] = HEADER_FREQ_VAL
+    spec_row_2.iat[0, 1] = int(val)
+
+    df_header_processed = insert_row(df_header_processed, spec_row_2, spec_row_2.index[0] + 1)
+
+    return df_header_processed
 
 
 def process_header(header_text):
     df_header = dataframe_from_text(header_text)
-    if (df_header[0].str[HEADER_SPLIT_INDENT] != ' ').any():
+    if (df_header[0].str[HEADER_SEPARATOR_INDENT] != ' ').any():
         raise ValueError('Cannot split header ')
 
     tmp = df_header[0]
-    df_header[0] = tmp.str[:HEADER_SPLIT_INDENT].str.strip()
-    df_header[1] = tmp.str[HEADER_SPLIT_INDENT:].str.strip()
+    df_header[0] = tmp.str[:HEADER_SEPARATOR_INDENT].str.strip()
+    df_header[1] = tmp.str[HEADER_SEPARATOR_INDENT:].str.strip()
 
     df_header = fix_header_values(df_header)
 
