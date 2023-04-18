@@ -73,6 +73,7 @@ class Test:
         with pytest.raises(Exception):
             main()
 
+    # TODO extract scenario into dev
     @pytest.mark.parametrize('src_path', [Path('./test_import_headers_experiment')])
     def test_full_batch(self, use_fixture_path, src_path):
         main()

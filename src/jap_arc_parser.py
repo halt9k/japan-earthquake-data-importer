@@ -56,9 +56,9 @@ def extract_arc_data(src_arc_path, skip_data):
     for fname, fbytes in eq_data.items():
         try:
             text = str(fbytes, "utf-8")
-            df_header, _ = jap_text_to_tables(text, skip_data)
+            df_header, df_data = jap_text_to_tables(text, skip_data)
             earthquake_date = df_header.loc[df_header[0] == HEADER_DATE].values[0, 1]
-            modify_guide_dfs[fname] = df_header, None, earthquake_date
+            modify_guide_dfs[fname] = df_header, df_data, earthquake_date
         except ValueError:
             err_exit(str(ValueError) + fname)
 
@@ -121,10 +121,14 @@ def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
     arc_data = {}
     for path in src_arc_paths:
         log_msg('Processing archive  ' + path)
-        arc_data[path] = extract_arc_headers(path)
+		if mode == single_page:
+        	arc_data[path] = extract_arc_headers(path)
+		else:
+        	arc_data[path] = extract_arc_data(path)
 
-    headers_data = aggregate_headers(arc_data)
+	if mode == single_page:
+    	arc_data = aggregate_headers(arc_data).T
 
     log_msg('Writing table to ' + tgt_xlsx_path)
-    modify_excel_shreadsheet(tgt_xlsx_path, headers_data.T)
+    modify_excel_shreadsheet(tgt_xlsx_path, arc_data)
     return tgt_xlsx_path

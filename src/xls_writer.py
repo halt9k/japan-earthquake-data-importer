@@ -6,7 +6,8 @@ import xlwings as xw
 from config import APP
 from errors import log_msg, err_exit, debugger_is_active
 
-IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADERS"
+IMPORT_XLS_ANCHOR_HEADERS = "IMPORT_HEADERS"
+IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
 IMPORT_XLS_ANCHOR_DATA = "IMPORT_DATA_"
 
 
@@ -22,7 +23,7 @@ def write_table_below(sheet, anchor, table: pd.DataFrame):
 
         # table dims without index
         sx, sy = table.shape[0] - 1, table.shape[1] - 1
-
+TODO 
         range_top_left = xw.Range(anchor).expand().rows(0).offset(row_offset=1)
         range_bottom_right = range_top_left.offset(sx, sy)
         rng = xw.Range(range_top_left, range_bottom_right)
@@ -41,7 +42,20 @@ def write_table_below(sheet, anchor, table: pd.DataFrame):
 
 
 def import_to_sheet(sheet, eq_table):
-     write_table_below(sheet, IMPORT_XLS_ANCHOR_HEADER, eq_table)
+     write_table_below(sheet, IMPORT_XLS_ANCHOR_HEADERS, eq_table)
+TODO
+def import_to_sheet(sheet, eq_tables):
+    eq_date = None
+
+    for arc_fname, (df_header, df_data, earthquake_date) in eq_tables.items():
+        ext = os.path.splitext(arc_fname)[1].removeprefix('.')
+        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
+        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
+        if eq_date:
+            assert (eq_date == earthquake_date)
+        else:
+            eq_date = earthquake_date
+    return eq_date
 
 
 def get_workbook(fname):
@@ -77,12 +91,21 @@ def modify_excel_shreadsheet(fname, arcives_data):
     workbook = get_workbook(fname)
     try:
         enter_excel(slowdown_import)
-
+		
+		
+if mode = single_page:
         import_sheet = xw.Sheet(workbook.sheets[0])
         # TODO
         # for eq_tables in arcives_data.values():
         import_to_sheet(import_sheet, arcives_data)
+else:
+        template_sheet = xw.Sheet(workbook.sheets[0])
+        for eq_tables in arcives_data.values():
+            import_sheet = template_sheet.copy(after=template_sheet)
+            eq_date = import_to_sheet(import_sheet, eq_tables)
+            import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
 
+        template_sheet.delete()
         workbook.save()
     finally:
         exit_excel()
