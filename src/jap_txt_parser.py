@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from src.pandas_utils import dataframe_from_text, insert_row
+from pandas_utils import dataframe_from_text, insert_row
 
 HEADER_SCALE = 'Scale Factor'
 HEADER_SCALE_VAL = HEADER_SCALE + ' Value'
