@@ -49,7 +49,7 @@ def prepare_files(src_arc_paths, xlsx_template_path):
     return tgt_xlsx_path
 
 
-def extract_arc_data(src_arc_path, skip_data):
+def extract_arc_data(src_arc_path, skip_data=False):
     eq_data = extract_arcive_files(src_arc_path, EXTRACT_ARC_EXT)
 
     modify_guide_dfs = {}
@@ -65,11 +65,8 @@ def extract_arc_data(src_arc_path, skip_data):
     return modify_guide_dfs
 
 
-def extract_arc_headers(path):
-    return extract_arc_data(path, skip_data=True)
-
 # TODO
-# def ensure_integrity(df_header, df_aggregated):
+# def ensure_headers_integrity(df_header, df_aggregated):
 #     assert (False)
 
 
@@ -115,20 +112,18 @@ def aggregate_headers(arc_data):
     return df_aggregated
 
 
-def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path):
+def jap_arcs_to_xlsx(src_arc_paths, xlsx_template_path, skip_data):
     tgt_xlsx_path = prepare_files(src_arc_paths, xlsx_template_path)
 
     arc_data = {}
     for path in src_arc_paths:
         log_msg('Processing archive  ' + path)
-		if mode == single_page:
-        	arc_data[path] = extract_arc_headers(path)
-		else:
-        	arc_data[path] = extract_arc_data(path)
+        arc_data[path] = extract_arc_data(path, skip_data=skip_data)
 
-	if mode == single_page:
-    	arc_data = aggregate_headers(arc_data).T
+    # TODO not parsing op
+    if skip_data:
+        arc_data = aggregate_headers(arc_data).T
 
     log_msg('Writing table to ' + tgt_xlsx_path)
-    modify_excel_shreadsheet(tgt_xlsx_path, arc_data)
+    modify_excel_shreadsheet(tgt_xlsx_path, arc_data, single_page_mode=skip_data)
     return tgt_xlsx_path

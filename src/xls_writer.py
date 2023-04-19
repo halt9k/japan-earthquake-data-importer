@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import xlwings as xw
 
-from config import APP
+from config import APP, ImportModes
 from errors import log_msg, err_exit, debugger_is_active
 
 IMPORT_XLS_ANCHOR_HEADERS = "IMPORT_HEADERS"
@@ -11,7 +11,7 @@ IMPORT_XLS_ANCHOR_HEADER = "IMPORT_HEADER_"
 IMPORT_XLS_ANCHOR_DATA = "IMPORT_DATA_"
 
 
-def write_table_below(sheet, anchor, table: pd.DataFrame):
+def write_table_below_anchor(sheet, anchor, table: pd.DataFrame):
     # df = sheet.Range(anchor).table.value
     # target_df = xw.Range('A7').options(pd.DataFrame, expand='table').value
     # df = pd.DataFrame(df)  # into Pandas DataFrame
@@ -23,7 +23,7 @@ def write_table_below(sheet, anchor, table: pd.DataFrame):
 
         # table dims without index
         sx, sy = table.shape[0] - 1, table.shape[1] - 1
-TODO 
+        # TODO verify works in both modes
         range_top_left = xw.Range(anchor).expand().rows(0).offset(row_offset=1)
         range_bottom_right = range_top_left.offset(sx, sy)
         rng = xw.Range(range_top_left, range_bottom_right)
@@ -42,15 +42,17 @@ TODO
 
 
 def import_to_sheet(sheet, eq_table):
-     write_table_below(sheet, IMPORT_XLS_ANCHOR_HEADERS, eq_table)
-TODO
-def import_to_sheet(sheet, eq_tables):
+    write_table_below_anchor(sheet, IMPORT_XLS_ANCHOR_HEADERS, eq_table)
+
+
+# TODO verify works in both modes
+def import_to_sheets(sheet, eq_tables):
     eq_date = None
 
     for arc_fname, (df_header, df_data, earthquake_date) in eq_tables.items():
         ext = os.path.splitext(arc_fname)[1].removeprefix('.')
-        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
-        write_table_under_xls_ancor(sheet, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
+        write_table_below_anchor(sheet, IMPORT_XLS_ANCHOR_HEADER + ext, df_header)
+        write_table_below_anchor(sheet, IMPORT_XLS_ANCHOR_DATA + ext, df_data)
         if eq_date:
             assert (eq_date == earthquake_date)
         else:
@@ -78,7 +80,7 @@ def exit_excel():
         app.quit()
 
 
-def modify_excel_shreadsheet(fname, arcives_data):
+def modify_excel_shreadsheet(fname, arcives_data, single_page_mode):
     log_msg('Writing xlsx from archive files \n')
 
     # writer = pd.ExcelWriter(path=fname, engine='xlsxwriter')
@@ -91,21 +93,22 @@ def modify_excel_shreadsheet(fname, arcives_data):
     workbook = get_workbook(fname)
     try:
         enter_excel(slowdown_import)
-		
-		
-if mode = single_page:
-        import_sheet = xw.Sheet(workbook.sheets[0])
-        # TODO
-        # for eq_tables in arcives_data.values():
-        import_to_sheet(import_sheet, arcives_data)
-else:
-        template_sheet = xw.Sheet(workbook.sheets[0])
-        for eq_tables in arcives_data.values():
-            import_sheet = template_sheet.copy(after=template_sheet)
-            eq_date = import_to_sheet(import_sheet, eq_tables)
-            import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
 
-        template_sheet.delete()
+        # TODO verify works in both modes
+        if single_page_mode:
+            import_sheet = xw.Sheet(workbook.sheets[0])
+            # TODO
+            # for eq_tables in arcives_data.values():
+            import_to_sheet(import_sheet, arcives_data)
+        else:
+            template_sheet = xw.Sheet(workbook.sheets[0])
+            for eq_tables in arcives_data.values():
+                import_sheet = template_sheet.copy(after=template_sheet)
+                eq_date = import_to_sheets(import_sheet, eq_tables)
+                import_sheet.name = eq_date.strftime('%Y.%m.%d_%H%M')
+
+            template_sheet.delete()
+
         workbook.save()
     finally:
         exit_excel()
