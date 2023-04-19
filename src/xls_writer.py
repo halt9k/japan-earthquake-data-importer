@@ -24,7 +24,11 @@ def write_table_below_anchor(sheet, anchor, table: pd.DataFrame):
         # table dims without index
         sx, sy = table.shape[0] - 1, table.shape[1] - 1
         # TODO verify works in both modes
-        range_top_left = xw.Range(anchor).expand().rows(0).offset(row_offset=1)
+
+        # useful in row append mode
+        # range_top_left = xw.Range(anchor).expand().rows(0).offset(row_offset=1)
+
+        range_top_left = xw.Range(anchor).offset(row_offset=1)
         range_bottom_right = range_top_left.offset(sx, sy)
         rng = xw.Range(range_top_left, range_bottom_right)
         if not rng.number_format:
