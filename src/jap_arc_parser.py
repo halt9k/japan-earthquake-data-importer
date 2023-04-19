@@ -66,8 +66,10 @@ def extract_arc_data(src_arc_path, skip_data=False):
 
 
 # TODO
-# def ensure_headers_integrity(df_header, df_aggregated):
-#     assert (False)
+def ensure_headers_integrity(df_expected, df_parsed):
+    if not df_expected.eq(df_parsed).all():
+        err_msg = str(df_expected) + ' \n ' + str(df_parsed)
+        err_exit('Unexpected data difference of values for same site:\n' + err_msg)
 
 
 def filter_header(ext, df_header, src_column, column_set):
@@ -82,19 +84,38 @@ def filter_header(ext, df_header, src_column, column_set):
 
 def aggregate_site_headers(eq_table, col_names_mode=False):
     site_data_column = None
+    common_data, common_low_data, common_high_data = None, None, None
 
     for arc_fname, (df_header, _, earthquake_date) in eq_table.items():
         ext = Path(arc_fname).suffix
 
         src_column = 1 if not col_names_mode else 0
-        if site_data_column is None:
-            site_data_column = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_FOR_SITE)
+        if common_data is None:
+            common_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_FOR_SITE)
+            site_data_column = common_data
+        else:
+            cur_common_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_FOR_SITE)
+            ensure_headers_integrity(common_data, cur_common_data)
+
+        if ext.endswith('1'):
+            if common_low_data is None:
+                common_low_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH)
+            else:
+                cur_low_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH)
+                ensure_headers_integrity(common_low_data, cur_low_data)
+
+        if ext.endswith('2'):
+            if common_high_data is None:
+                common_high_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH)
+            else:
+                cur_high_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH)
+                ensure_headers_integrity(common_high_data, cur_high_data)
 
         update_data = filter_header(ext, df_header, src_column, VAL_EXPECTED_SAME_ON_SEISMOGRAPH + VAL_EXPECTED_DIFFERENT)
         if col_names_mode:
             update_data += ext
 
-        site_data_column = site_data_column.append(update_data)
+        site_data_column = pd.concat((site_data_column, update_data))
     return site_data_column
 
 
