@@ -48,7 +48,8 @@ class AppConfig:
 
     @staticmethod
     def validate_enums(config):
-        assert(config['Excel import']['import_mode'] in ImportModes.ALL)
+        if config.has_option('Excel import', 'import_mode'):
+            assert(config['Excel import']['import_mode'] in ImportModes.ALL)
 
     @staticmethod
     def ensure_correct_config_file(default_config, ini_config, conf_path):
