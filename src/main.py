@@ -4,7 +4,7 @@ import subprocess
 
 # TODO answer SO questions on deploy error if this line missing
 
-from config import APP
+from config import APP, ImportModes
 from errors import err_exit, debugger_is_active
 from jap_arc_parser import jap_arcs_to_xlsx, verify_file_exists
 from tkinter import filedialog
@@ -77,6 +77,7 @@ def get_archives(arc_path):
 
     return arc_paths
 
+
 # TODO separate into additional processing
 def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tamplate_path):
     arc_paths = get_config_paths(try_data_arc_paths, not ask_data_paths, [('Japan archives', ARC_MASK)],
@@ -92,7 +93,8 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
     if len(arc_paths) == 1 and os.path.isdir(arc_paths[0]):
         arc_paths = get_archives(arc_paths[0])
 
-    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path)
+    skip_data = APP.config()['Excel import']['import_mode'] == ImportModes.SINGLE_PAGE
+    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path, skip_data)
 
     return xlsx_fname
 
