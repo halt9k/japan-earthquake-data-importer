@@ -16,6 +16,7 @@ XLS_EXT = '.xlsx'
 XLS_MASK = '*' + XLS_EXT
 
 
+# overriden during tests
 def os_view_path(path):
     # subprocess.Popen(r'explorer /select,"' + name + '"')
     dir_path = os.path.abspath(path)

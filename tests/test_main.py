@@ -7,7 +7,7 @@ import pytest
 from contextlib import contextmanager
 
 from main import main
-from xls_writer import get_value, get_sheet_count
+from xls_reader import get_value, get_sheet_count
 
 
 @contextmanager
@@ -36,13 +36,14 @@ def os_view_path_patched(_):
     return
 
 
-def err_exit_patched(self, err_msg):
-    raise Exception(err_msg)
+def err_exit_patched(err_msg):
+    raise
 
 
 # @pytest.mark.usefixtures('use_fixture_path')
 @patch('main.os_view_path', os_view_path_patched)
 @patch('xls_writer.err_exit', err_exit_patched)
+@patch('xls_context.err_exit', err_exit_patched)
 class Test:
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/basic')])
     def test_full_basic(self, use_fixture_path, src_path):
@@ -57,21 +58,21 @@ class Test:
         assert(val == '2940(gal)/6170270')
 
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/empty_xls')])
-    def test_full_empty_xls(self, use_fixture_path, src_path):
+    def test_empty_template(self, use_fixture_path, src_path):
         main()
         new_file = list(Path().glob('Imported_*.xlsx'))[0]
         val = get_value(new_file, sheet_n='2012.11.17_1713', xls_range='P7105')
         assert(val == -30638.0)
 
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/batch')])
-    def test_full_batch(self, use_fixture_path, src_path):
+    def test_batch_import(self, use_fixture_path, src_path):
         input_arcs = list(Path().glob('./batch/*.tar.gz'))
         main()
         new_file = list(Path().glob('./batch/Imported_*.xlsx'))[0]
         assert(get_sheet_count(new_file) == len(input_arcs) > 0)
 
     @pytest.mark.parametrize('src_path', [Path('./test_main_fixtures/broken_xls')])
-    def test_full_broken_xls(self, use_fixture_path, src_path):
+    def test_incomplete_template(self, use_fixture_path, src_path):
         with pytest.raises(Exception):
             main()
 
@@ -84,6 +85,5 @@ class Test:
 
     @pytest.mark.parametrize('src_path', [Path('./test_import_headers_experiment_data_fail')])
     def test_batch_headers_inconsistent_data(self, use_fixture_path, src_path):
-        main()
-        new_file = list(Path().glob('./data/sites/IBRH17/Imported_*.xlsx'))[0]
-        assert(get_sheet_count(new_file) == 1)
+        with pytest.raises(Exception):
+            main()
