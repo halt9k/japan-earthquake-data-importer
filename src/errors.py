@@ -21,12 +21,14 @@ def debugger_is_active() -> bool:
     return hasattr(sys, 'gettrace') and sys.gettrace() is not None
 
 
+# overriden during tests
 def err_exit(err_msg):
     print_clear(err_msg, is_err=True)
-    if not debugger_is_active():
-        exit()
-    else:
+
+    if debugger_is_active():
         raise
+
+    exit()
 
 
 def log_msg(msg: str):
