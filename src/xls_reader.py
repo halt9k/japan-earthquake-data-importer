@@ -14,5 +14,5 @@ def get_value(fpath, sheet_n, xls_range):
 
 
 def get_sheet_count(fpath):
-    with open_excel(fpath, debugger_is_active()) as (app, wb):
+    with open_excel(fpath, debugger_is_active()) as wb:
         return wb.sheets.count

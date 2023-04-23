@@ -1,6 +1,8 @@
 from configparser import ConfigParser, NoOptionError
 from enum import Enum
 
+from pandas.io import json
+
 
 class ImportModes:
     MULTIPLE_PAGES = 'multiple_pages'
@@ -16,7 +18,8 @@ DEFAULT_CONFIG = {
         'default_xls_template': ''
     },
     'Excel import': {
-        'import_mode': ImportModes.MULTIPLE_PAGES
+        'import_mode': ImportModes.MULTIPLE_PAGES,
+        'header_final_order': ''
     },
     'UX': {
         'slow_paced_import': True
@@ -73,6 +76,15 @@ class AppConfig:
         # all checked, read again to do override of defaults
         self.__config = default_config
         self.__config.read(conf_path)
+
+    # TODO improve
+    @staticmethod
+    def get_list(config, section, entry):
+        str_entry = config[section][entry]
+        if '\n' in str_entry:
+            return list(json.loads(str_entry))
+        else:
+            return list([str_entry])
 
 
 APP = AppConfig()
