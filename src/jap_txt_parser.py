@@ -7,7 +7,7 @@ from pandas_utils import dataframe_from_text, insert_row
 HEADER_SCALE = 'Scale Factor'
 HEADER_SCALE_VAL = HEADER_SCALE + ' Value'
 HEADER_FREQ = 'Sampling Freq(Hz)'
-HEADER_FREQ_VAL = HEADER_SCALE + ' Value'
+HEADER_FREQ_VAL = HEADER_FREQ + ' Value'
 HEADER_DATE = 'Origin Time'
 HEADER_SEPARATOR_INDENT = 17
 HEADER_END = 'Memo.'
@@ -34,8 +34,8 @@ HEADER_INFO = [
     ['Station Long.', float, ED.SAME_FOR_GEO_SITE],
     ['Station Height(m)', int, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Record Time', datetime, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
-    ['Sampling Freq(Hz)', str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
-    ['Duration Time(s)', int, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
+    [HEADER_FREQ, str, ED.SAME_FOR_GEO_SITE],
+    ['Duration Time(s)', int, ED.SAME_FOR_GEO_SITE],
     ['Dir.', int, ED.EXPECTED_ANY],
     [HEADER_SCALE, str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Max. Acc. (gal)', float, ED.EXPECTED_ANY],
@@ -45,7 +45,7 @@ HEADER_INFO = [
 # Header is preprocessed during import, after preprocess:
 HEADER_INFO_AP = HEADER_INFO + \
                  [[HEADER_SCALE_VAL, float, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS]] + \
-                 [[HEADER_FREQ_VAL, float, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS]]
+                 [[HEADER_FREQ_VAL, float, ED.SAME_FOR_GEO_SITE]]
 DF_HEADER_INFO = pd.DataFrame(HEADER_INFO)
 
 # header info after preprocess

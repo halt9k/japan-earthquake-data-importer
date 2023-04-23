@@ -95,17 +95,15 @@ def import_data(try_data_arc_paths, ask_data_paths, try_template_path, ask_tampl
         arc_paths = get_archives(arc_paths[0])
 
     skip_data = APP.config()['Excel import']['import_mode'] == ImportModes.SINGLE_PAGE
-    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path, skip_data)
+    # TODO improve config handling
+    xlsx_fname = jap_arcs_to_xlsx(arc_paths, template_path, skip_data, APP.config())
 
     return xlsx_fname
 
 
 def process_dir():
-    try_data_paths_text = APP.config()['Data sources']['default_arc_paths']
     ask_data_paths = APP.config()['Data sources'].getboolean('ask_archive')
-
-    try_data_paths = try_data_paths_text.replace('\t', '').split('\n')
-    try_data_paths = list(filter(None, try_data_paths))
+    try_data_paths = APP.get_list(APP.config(), 'Data sources', 'default_arc_paths')
 
     try_template_path = APP.config()['Data sources']['default_xls_template']
     ask_template = APP.config()['Data sources'].getboolean('ask_xls_template')

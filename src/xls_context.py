@@ -20,7 +20,7 @@ def end_excel(wb):
 @contextmanager
 def open_excel(fpath, show_window):
     """
-    @param fpath
+    @param fpath: path to file
     @param show_window: mostly debug use, introduces dramatic slowdown
     """
 
