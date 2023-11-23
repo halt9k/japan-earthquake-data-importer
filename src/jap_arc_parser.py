@@ -113,7 +113,10 @@ def aggregate_site_headers(eq_table, col_names_mode=False):
         elif ext.endswith('2'):
             common_high_data = ensure_headers_integrity(common_high_data, expected_same_for_heights)
         else:
-            assert False
+            if ext in STANDARD:
+                print('Simple data detected instead of low and high. Skipping low vs high header integrity check.')
+            else:
+                assert(False)
 
         if col_names_mode:
             update_data += ext
