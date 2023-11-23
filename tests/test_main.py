@@ -96,5 +96,5 @@ class Test:
     @pytest.mark.parametrize('src_path', [Path('./tests/test_import_only_3')])
     def test_import_only_3(self, use_fixture_path, src_path):
         main()
-        new_file = list(Path().glob('./data/sites/IBRH17/Imported_*.xlsx'))[0]
+        new_file = list(Path().glob('./data/Imported_*.xlsx'))[0]
         assert(get_sheet_count(new_file) == 1)
