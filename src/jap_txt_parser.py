@@ -36,7 +36,7 @@ HEADER_INFO = [
     ['Record Time', datetime, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     [HEADER_FREQ, str, ED.SAME_FOR_GEO_SITE],
     ['Duration Time(s)', int, ED.SAME_FOR_GEO_SITE],
-    ['Dir.', int, ED.EXPECTED_ANY],
+    ['Dir.', str, ED.EXPECTED_ANY],
     [HEADER_SCALE, str, ED.SAME_FOR_SEISMOGRAPH_DIRECTIONS],
     ['Max. Acc. (gal)', float, ED.EXPECTED_ANY],
     ['Last Correction', datetime, ED.EXPECTED_ANY],
