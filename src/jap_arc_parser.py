@@ -14,9 +14,10 @@ from jap_txt_parser import jap_text_to_tables, HEADER_DATE, VAL_EXPECTED_SAME_FO
 from tar_extract import extract_arcive_files
 from xls_writer import modify_excel_shreadsheet
 
+STANDARD = ['.EW', '.NS', '.UD']
 LOW_SM = ['.EW1', '.NS1', '.UD1']
 HIGH_SM = ['.EW2', '.NS2', '.UD2']
-EXTRACT_ARC_EXT = LOW_SM + HIGH_SM
+EXTRACT_ARC_EXT = STANDARD + LOW_SM + HIGH_SM
 
 
 def verify_file_exists(path):
