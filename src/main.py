@@ -122,4 +122,7 @@ def main():
 
 
 if __name__ == '__main__':
+    if os.path.basename(os.path.abspath(os.curdir)) == 'src':
+        print('Run from src dir detected. Changing to parent dir')
+        os.chdir(os.pardir)
     main()

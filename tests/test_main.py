@@ -23,6 +23,11 @@ def cwd(path):
 @pytest.mark.usefixtures('tmp_path')
 @pytest.fixture
 def use_fixture_path(tmp_path: Path, src_path: Path):
+    # TODO move to lib
+    if os.path.basename(os.path.abspath(os.curdir)) == 'tests':
+        print('Run from tests dir detected. Changing to parent dir')
+        os.chdir(os.pardir)
+
     assert(src_path.exists())
 
     shutil.copytree(src_path, tmp_path, dirs_exist_ok=True)
@@ -87,3 +92,9 @@ class Test:
     def test_batch_headers_inconsistent_data(self, use_fixture_path, src_path):
         with pytest.raises(Exception):
             main()
+
+    @pytest.mark.parametrize('src_path', [Path('./tests/test_import_only_3')])
+    def test_import_only_3(self, use_fixture_path, src_path):
+        main()
+        new_file = list(Path().glob('./data/sites/IBRH17/Imported_*.xlsx'))[0]
+        assert(get_sheet_count(new_file) == 1)
